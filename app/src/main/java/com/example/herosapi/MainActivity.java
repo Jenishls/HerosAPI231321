@@ -40,7 +40,7 @@ import url.Url;
 public class MainActivity extends AppCompatActivity {
     private EditText etName, etDesc;
     private ImageView imgProfile;
-    private Button btnSave, btnViewData;
+    private Button btnSave, btnViewData, btnLogout;
     String imagePath;
     String imageName;
 
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         imgProfile = findViewById(R.id.imgProfile);
         btnSave = findViewById(R.id.btnSave);
         btnViewData = findViewById(R.id.btnViewData);
+        btnLogout = findViewById(R.id.btnLogout);
 
         imgProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,6 +75,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, HeroesActivity.class);
                 startActivity(intent);
+            }
+        });
+
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
             }
         });
     }
@@ -117,72 +125,6 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
-//    private void save() {
-//        String name = etName.getText().toString();
-//        String desc= etDesc.getText().toString();
-//
-//        Heroes heroes = new Heroes(name, desc);
-//
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl(Url.BASE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        HeroesAPI heroesAPI = retrofit.create(HeroesAPI.class);
-//        Call<Void> heroesCall = heroesAPI.addHero(heroes);
-//
-//        heroesCall.enqueue(new Callback<Void>() {
-//            @Override
-//            public void onResponse(Call<Void> call, Response<Void> response) {
-//                if (!response.isSuccessful()){
-//                    Toast.makeText(MainActivity.this, "Code : "+response.code(), Toast.LENGTH_LONG).show();
-//                    return;
-//                }
-//                Toast.makeText(MainActivity.this, "Successfully Added", Toast.LENGTH_LONG).show();
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Void> call, Throwable t) {
-//                Toast.makeText(MainActivity.this, "Code : "+t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-//            }
-//        });
-//    }
-
-//    private void saveUsingField() {
-//        String name = etName.getText().toString();
-//        String desc= etDesc.getText().toString();
-//
-//        Heroes heroes = new Heroes(name, desc);
-//
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl(Url.BASE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        HeroesAPI heroesAPI = retrofit.create(HeroesAPI.class);
-//        Call<Void> heroesCall = heroesAPI.addHero(name, desc);
-//
-//        heroesCall.enqueue(new Callback<Void>() {
-//            @Override
-//            public void onResponse(Call<Void> call, Response<Void> response) {
-//                if (!response.isSuccessful()){
-//                    Toast.makeText(MainActivity.this, "Code : "+response.code(), Toast.LENGTH_LONG).show();
-//                    return;
-//                }
-//                Toast.makeText(MainActivity.this, "Successfully Added", Toast.LENGTH_LONG).show();
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<Void> call, Throwable t) {
-//                Toast.makeText(MainActivity.this, "Code : "+t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-//            }
-//        });
-//    }
-
-
-
     private void saveUsingFieldMap() {
         saveImageOnly();
         String name = etName.getText().toString();
@@ -195,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         HeroesAPI heroesAPI = Url.getInstance().create(HeroesAPI.class);
-        Call<Void> heroesCall = heroesAPI.addHero(map);
+        Call<Void> heroesCall = heroesAPI.addHero(Url.Cookie,map);
 
         heroesCall.enqueue(new Callback<Void>() {
             @Override
@@ -218,6 +160,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void logout(){
+        HeroesAPI heroesAPI = Url.getInstance().create(HeroesAPI.class);
+        Call<Void> heroesCall = heroesAPI.logout(Url.Cookie);
+
+        heroesCall.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Toast.makeText(MainActivity.this, "Logout", Toast.LENGTH_LONG).show();
+
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Code : "+t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     private void StrictMode(){
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
@@ -229,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"),file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("imageFile", file.getName(), requestBody);
         HeroesAPI heroesAPI1 = Url.getInstance().create(HeroesAPI.class);
-        Call<ImageResponse> responseBodyCall = heroesAPI1.uploadImage(body);
+        Call<ImageResponse> responseBodyCall = heroesAPI1.uploadImage(Url.Cookie,body);
 
         StrictMode();
 

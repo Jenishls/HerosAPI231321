@@ -31,7 +31,7 @@ public class HeroesActivity extends AppCompatActivity {
 
         HeroesAPI heroAPI = Url.getInstance().create(HeroesAPI.class);
 
-        Call<List<Heroes>> listCall = heroAPI.getAllHeroes();
+        Call<List<Heroes>> listCall = heroAPI.getAllHeroes(Url.Cookie);
 
         listCall.enqueue(new Callback<List<Heroes>>() {
             @Override
